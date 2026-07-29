@@ -1,6 +1,6 @@
 export default {
   common: {
-    appName: "TTS Vue Next",
+    appName: "AuraVoice",
     formats: {
       mp3: "MP3",
       wav: "WAV",
@@ -120,7 +120,7 @@ export default {
     },
     about: {
       description:
-        "一个由 Microsoft Edge TTS 服务驱动，并基于 Vue 3、Vuetify 和 Tauri 构建的桌面 TTS 应用。",
+        "AuraVoice - 由 Edge TTS + Whisper 驱动的桌面 TTS 和英语口语练习应用，基于 Vue 3、Vuetify 和 Tauri 构建。",
     },
   },
   practice: {

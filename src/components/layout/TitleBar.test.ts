@@ -237,7 +237,7 @@ describe("TitleBar", () => {
     await flushPromises();
 
     expect(openUrlMock).toHaveBeenCalledWith(
-      "https://github.com/LokerL/tts-vue-next",
+      "https://github.com/weixc0856-cell/AuraVoice",
     );
   });
 });

@@ -282,7 +282,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_read_text_file_rejects_missing_extension() {
-        let path = env::temp_dir().join(format!("tts-vue-next-{}", Uuid::new_v4()));
+        let path = env::temp_dir().join(format!("auravioce-{}", Uuid::new_v4()));
         tokio::fs::write(&path, "plain text").await.unwrap();
 
         let error = read_text_file(path.to_string_lossy().into_owned())
@@ -306,7 +306,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_read_text_file_rejects_directory_path() {
-        let path = env::temp_dir().join(format!("tts-vue-next-dir-{}", Uuid::new_v4()));
+        let path = env::temp_dir().join(format!("auravioce-dir-{}", Uuid::new_v4()));
         tokio::fs::create_dir(&path).await.unwrap();
 
         let error = read_text_file(path.to_string_lossy().into_owned())
@@ -346,7 +346,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_remove_file_deletes_existing_temp_audio_file() {
-        let path = env::temp_dir().join(format!("tts-vue-next-{}.tmp.mp3", Uuid::new_v4()));
+        let path = env::temp_dir().join(format!("auravioce-{}.tmp.mp3", Uuid::new_v4()));
         tokio::fs::write(&path, b"temporary file").await.unwrap();
 
         remove_file(path.to_string_lossy().into_owned())
@@ -382,7 +382,7 @@ mod tests {
     }
 
     fn unique_temp_path(extension: &str) -> PathBuf {
-        env::temp_dir().join(format!("tts-vue-next-{}.{}", Uuid::new_v4(), extension))
+        env::temp_dir().join(format!("auravioce-{}.{}", Uuid::new_v4(), extension))
     }
 
     fn create_docx_file(path: &PathBuf) {

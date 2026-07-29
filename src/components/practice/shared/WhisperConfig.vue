@@ -36,9 +36,9 @@ const downloadLink = computed(() => {
 async function detectPaths() {
   // Try to find a ggml-*.bin model in common locations
   const candidates = [
-    'D:\\Project\\TTS Vue Next\\ggml-base.en.bin',
-    'D:\\Project\\TTS Vue Next\\ggml-small.en.bin',
-    'D:\\Project\\TTS Vue Next\\ggml-tiny.en.bin',
+    'D:\\Project\\AuraVoice\\ggml-base.en.bin',
+    'D:\\Project\\AuraVoice\\ggml-small.en.bin',
+    'D:\\Project\\AuraVoice\\ggml-tiny.en.bin',
     'C:\\tools\\whisper.cpp\\ggml-base.en.bin',
     'C:\\tools\\whisper.cpp\\ggml-small.en.bin',
     './ggml-base.en.bin',

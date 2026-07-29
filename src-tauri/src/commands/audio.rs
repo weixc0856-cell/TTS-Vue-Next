@@ -130,10 +130,10 @@ mod tests {
     }
 
     fn unique_temp_audio_path() -> PathBuf {
-        env::temp_dir().join(format!("tts-vue-next-{}.tmp.mp3", Uuid::new_v4()))
+        env::temp_dir().join(format!("auravioce-{}.tmp.mp3", Uuid::new_v4()))
     }
 
     fn unique_temp_path(extension: &str) -> PathBuf {
-        env::temp_dir().join(format!("tts-vue-next-{}.{}", Uuid::new_v4(), extension))
+        env::temp_dir().join(format!("auravioce-{}.{}", Uuid::new_v4(), extension))
     }
 }

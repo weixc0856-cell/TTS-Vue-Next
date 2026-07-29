@@ -107,7 +107,7 @@ jobs:
         if: matrix.platform == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: tts-vue-next-${{ matrix.target }}
+          name: auravioce-${{ matrix.target }}
           path: |
             src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*-setup.exe
           if-no-files-found: error
@@ -116,7 +116,7 @@ jobs:
         if: matrix.platform == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: tts-vue-next-${{ matrix.target }}
+          name: auravioce-${{ matrix.target }}
           path: |
             src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
           if-no-files-found: error
@@ -125,7 +125,7 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04'
         uses: actions/upload-artifact@v4
         with:
-          name: tts-vue-next-${{ matrix.target }}
+          name: auravioce-${{ matrix.target }}
           path: |
             src-tauri/target/${{ matrix.target }}/release/bundle/
           if-no-files-found: error

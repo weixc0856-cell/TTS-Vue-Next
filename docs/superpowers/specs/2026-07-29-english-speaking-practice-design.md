@@ -1,6 +1,6 @@
 # English Speaking Practice — Design Document
 
-> Extending TTS Vue Next (Edge TTS + Vue 3 + Vuetify + Tauri) into a complete English speaking practice tool with listening-speaking feedback loop.
+> Extending AuraVoice (Edge TTS + Vue 3 + Vuetify + Tauri) into a complete English speaking practice tool with listening-speaking feedback loop.
 
 ## 1. Overview
 

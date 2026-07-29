@@ -1,4 +1,4 @@
-# TTS Vue Next
+# AuraVoice
 
 一个基于 Microsoft Edge TTS 服务的桌面文本转语音（TTS）应用程序，扩展了英语口语练习功能。采用 Vue 3、Vuetify 和 Tauri 构建。
 
@@ -109,7 +109,7 @@
 ```bash
 # 克隆项目
 git clone <repository-url>
-cd tts-vue-next
+cd auravioce
 
 # 安装前端依赖
 pnpm install
@@ -174,7 +174,7 @@ set TTS_VUE_NEXT_WHISPER_MODEL=C:/models/ggml-base.en.bin
 ## 项目结构
 
 ```
-tts-vue-next/
+auravioce/
 ├── src/                            # 前端源代码
 │   ├── components/
 │   │   ├── batch/                 # 批量转换组件

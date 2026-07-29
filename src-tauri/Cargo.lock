@@ -322,6 +322,45 @@ dependencies = [
 ]
 
 [[package]]
+name = "auravoice"
+version = "0.2.0"
+dependencies = [
+ "assessment-engine",
+ "async-trait",
+ "audio-engine",
+ "base64 0.22.1",
+ "chrono",
+ "content-engine",
+ "docx-rs",
+ "env_logger",
+ "futures-util",
+ "hound",
+ "log",
+ "practice-domain",
+ "pulldown-cmark",
+ "rand 0.9.4",
+ "regex",
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "sha2",
+ "speech-engine",
+ "storage",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-fs",
+ "tauri-plugin-opener",
+ "tauri-plugin-shell",
+ "tauri-plugin-store",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-tungstenite",
+ "url",
+ "uuid",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5558,45 +5597,6 @@ name = "try-lock"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
-
-[[package]]
-name = "tts-vue-next"
-version = "0.2.0"
-dependencies = [
- "assessment-engine",
- "async-trait",
- "audio-engine",
- "base64 0.22.1",
- "chrono",
- "content-engine",
- "docx-rs",
- "env_logger",
- "futures-util",
- "hound",
- "log",
- "practice-domain",
- "pulldown-cmark",
- "rand 0.9.4",
- "regex",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "sha2",
- "speech-engine",
- "storage",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-fs",
- "tauri-plugin-opener",
- "tauri-plugin-shell",
- "tauri-plugin-store",
- "thiserror 2.0.18",
- "tokio",
- "tokio-tungstenite",
- "url",
- "uuid",
-]
 
 [[package]]
 name = "tungstenite"

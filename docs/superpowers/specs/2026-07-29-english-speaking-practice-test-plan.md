@@ -84,7 +84,7 @@ cd src-tauri && cargo test -p practice-domain -p audio-engine -p speech-engine \
   -p assessment-engine -p content-engine -p storage
 
 # Full app including existing tests
-cd src-tauri && cargo test -p tts-vue-next
+cd src-tauri && cargo test -p auravioce
 
 # All tests
 cd src-tauri && cargo test
@@ -190,7 +190,7 @@ cd src-tauri && cargo test
 cd .. && pnpm test
 
 # Build check
-cd src-tauri && cargo build -p tts-vue-next
+cd src-tauri && cargo build -p auravioce
 cd .. && npx vue-tsc --noEmit && npx vite build
 ```
 
