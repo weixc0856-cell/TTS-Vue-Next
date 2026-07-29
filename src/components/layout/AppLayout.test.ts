@@ -49,6 +49,7 @@ async function mountLayout(path = "/") {
     routes: [
       { path: "/", component: { template: "<div />" } },
       { path: "/batch", component: { template: "<div />" } },
+      { path: "/practice", component: { template: "<div />" } },
       { path: "/settings", component: { template: "<div />" } },
     ],
   });
@@ -92,9 +93,10 @@ describe("AppLayout", () => {
 
     expect(wrapper.text()).toContain("TTS");
     expect(wrapper.text()).toContain("Batch Convert");
+    expect(wrapper.text()).toContain("Speaking Practice");
     expect(wrapper.text()).toContain("Settings");
     expect(wrapper.get('[data-testid="sidebar-version"]').text()).toContain(
-      "Version v0.1.0",
+      "Version v0.2.0",
     );
     expect(
       wrapper.find('[data-testid="sidebar-version-update-icon"]').exists(),
@@ -129,7 +131,7 @@ describe("AppLayout", () => {
   test("shows warning style and update icon when a newer release exists", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      json: async () => ({ tag_name: "v0.2.0" }),
+      json: async () => ({ tag_name: "v0.3.0" }),
     } as Response);
 
     const { wrapper } = await mountLayout();
@@ -137,7 +139,7 @@ describe("AppLayout", () => {
 
     const version = wrapper.get('[data-testid="sidebar-version"]');
     expect(version.classes()).toContain("app-sidebar__footer--update");
-    expect(version.text()).toContain("Version v0.1.0 → v0.2.0");
+    expect(version.text()).toContain("Version v0.2.0 → v0.3.0");
     expect(
       wrapper.find('[data-testid="sidebar-version-update-icon"]').exists(),
     ).toBe(true);
