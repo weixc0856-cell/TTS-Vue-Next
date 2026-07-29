@@ -36,25 +36,28 @@ const color = computed(() => {
 });
 
 const label = computed(() => {
-  if (isRecording.value) return 'Release to stop';
-  return 'Hold to record';
+  if (isRecording.value) return 'Click to stop recording';
+  if (isProcessing.value) return 'Processing...';
+  return 'Click to record';
 });
 
-async function handlePointerDown() {
-  if (isRecording.value || props.disabled) return;
-  await recorder.startRecording();
-  startLevelPolling();
-}
+async function handleClick() {
+  if (props.disabled && !isRecording.value) return;
 
-async function handlePointerUp() {
-  if (!isRecording.value) return;
-  stopLevelPolling();
-  const audioData = await recorder.stopRecording();
-  if (audioData) {
-    emit('recorded', audioData, recorder.durationMs);
-  }
-  if (recorder.error) {
-    emit('error', recorder.error);
+  if (!isRecording.value) {
+    // Start recording
+    await recorder.startRecording();
+    startLevelPolling();
+  } else {
+    // Stop recording
+    stopLevelPolling();
+    const audioData = await recorder.stopRecording();
+    if (audioData) {
+      emit('recorded', audioData, recorder.durationMs);
+    }
+    if (recorder.error) {
+      emit('error', recorder.error);
+    }
   }
 }
 
@@ -84,12 +87,7 @@ function stopLevelPolling() {
       :disabled="disabled && !isRecording"
       :class="{ 'recording-active': isRecording }"
       class="record-btn"
-      @mousedown.prevent="handlePointerDown"
-      @mouseup="handlePointerUp"
-      @mouseleave="handlePointerUp"
-      @touchstart.prevent="handlePointerDown"
-      @touchend="handlePointerUp"
-      @touchcancel="handlePointerUp">
+      @click="handleClick">
       <v-icon :size="size === 'large' ? 48 : size === 'small' ? 24 : 36">
         {{ icon }}
       </v-icon>

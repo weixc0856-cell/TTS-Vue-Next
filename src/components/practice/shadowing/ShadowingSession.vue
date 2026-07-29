@@ -42,6 +42,13 @@ const hasNext = computed(() => currentIndex.value < sentences.value.length);
 
 onMounted(async () => {
   try {
+    // Seed content if not already done
+    try {
+      await invoke('seed_content');
+    } catch {
+      // ignore — already seeded
+    }
+
     // Load from route query (passed via navigation)
     const id = props.exerciseId || route.query.exerciseId as string;
     const inputText = props.text || route.query.text as string;
