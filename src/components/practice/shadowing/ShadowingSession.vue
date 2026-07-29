@@ -114,17 +114,18 @@ async function playReference() {
       },
     });
 
-    // Play the returned audio
-    const audioBytes = new Uint8Array(audioData);
-    const blob = new Blob([audioBytes], { type: 'audio/mpeg' });
-    const url = URL.createObjectURL(blob);
+    // Play the returned audio using base64 data URI (works in all Tauri webviews)
+    const bytes = new Uint8Array(audioData);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64 = btoa(binary);
+    const dataUri = `data:audio/mpeg;base64,${base64}`;
 
     if (audioRef.value) {
-      audioRef.value.src = url;
-      audioRef.value.load();
-      await audioRef.value.play().catch(() => {
-        // Browser may block autoplay, that's ok
-      });
+      audioRef.value.src = dataUri;
+      await audioRef.value.play().catch(() => {});
     }
   } catch (e) {
     message.error(String(e));

@@ -115,13 +115,17 @@ async function playPartnerLine() {
       },
     });
 
-    const audioBytes = new Uint8Array(audioData);
-    const blob = new Blob([audioBytes], { type: 'audio/mpeg' });
-    const url = URL.createObjectURL(blob);
+    // Play using base64 data URI (works reliably in production Tauri builds)
+    const bytes = new Uint8Array(audioData);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64 = btoa(binary);
+    const dataUri = `data:audio/mpeg;base64,${base64}`;
 
     if (partnerAudioRef.value) {
-      partnerAudioRef.value.src = url;
-      partnerAudioRef.value.load();
+      partnerAudioRef.value.src = dataUri;
       await partnerAudioRef.value.play().catch(() => {});
     }
   } catch (e) {
