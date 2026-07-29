@@ -65,6 +65,16 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install
 
+      - name: TypeScript type check
+        run: npx vue-tsc --noEmit
+
+      - name: Run frontend tests
+        run: pnpm test
+
+      - name: Run Rust workspace tests
+        run: cargo test -p practice-domain -p audio-engine -p speech-engine -p assessment-engine -p content-engine -p storage
+        working-directory: src-tauri
+
       - name: Build Tauri app and upload to release draft
         uses: tauri-apps/tauri-action@v0
         env:

@@ -65,6 +65,20 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install
 
+      - name: TypeScript type check
+        run: npx vue-tsc --noEmit
+
+      - name: Run frontend tests
+        run: pnpm test
+
+      - name: Run Rust workspace tests
+        run: cargo test -p practice-domain -p audio-engine -p speech-engine -p assessment-engine -p content-engine -p storage
+        working-directory: src-tauri
+
+      - name: Run full Rust tests (excluding network-dependent)
+        run: cargo test --lib
+        working-directory: src-tauri
+
       - name: Build Tauri app (Windows NSIS only)
         if: matrix.platform == 'windows-latest'
         uses: tauri-apps/tauri-action@v0
