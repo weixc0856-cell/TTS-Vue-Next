@@ -89,10 +89,12 @@ onMounted(async () => {
   }
 });
 
+const audioRef = ref<HTMLAudioElement | null>(null);
+
 async function playReference() {
   if (!currentSentence.value) return;
   try {
-    await invoke('tts_convert', {
+    const audioData = await invoke<number[]>('tts_convert', {
       params: {
         text: currentSentence.value.text,
         voice: 'en-US-EmmaMultilingualNeural',
@@ -104,6 +106,19 @@ async function playReference() {
         max_retries: 2,
       },
     });
+
+    // Play the returned audio
+    const audioBytes = new Uint8Array(audioData);
+    const blob = new Blob([audioBytes], { type: 'audio/mpeg' });
+    const url = URL.createObjectURL(blob);
+
+    if (audioRef.value) {
+      audioRef.value.src = url;
+      audioRef.value.load();
+      await audioRef.value.play().catch(() => {
+        // Browser may block autoplay, that's ok
+      });
+    }
   } catch (e) {
     message.error(String(e));
   }
@@ -201,6 +216,7 @@ async function completePractice() {
 
         <!-- Play Reference -->
         <div class="d-flex justify-center mb-4">
+          <audio ref="audioRef" preload="auto" style="display:none" />
           <v-btn
             variant="tonal"
             color="primary"

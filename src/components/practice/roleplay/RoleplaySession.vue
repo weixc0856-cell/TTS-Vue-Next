@@ -96,11 +96,13 @@ onMounted(async () => {
   }
 });
 
+const partnerAudioRef = ref<HTMLAudioElement | null>(null);
+
 async function playPartnerLine() {
   if (!currentExchange.value) return;
   partnerPlaying.value = true;
   try {
-    await invoke('tts_convert', {
+    const audioData = await invoke<number[]>('tts_convert', {
       params: {
         text: currentExchange.value.text,
         voice: 'en-US-EmmaMultilingualNeural',
@@ -112,6 +114,16 @@ async function playPartnerLine() {
         max_retries: 2,
       },
     });
+
+    const audioBytes = new Uint8Array(audioData);
+    const blob = new Blob([audioBytes], { type: 'audio/mpeg' });
+    const url = URL.createObjectURL(blob);
+
+    if (partnerAudioRef.value) {
+      partnerAudioRef.value.src = url;
+      partnerAudioRef.value.load();
+      await partnerAudioRef.value.play().catch(() => {});
+    }
   } catch (e) {
     message.error(String(e));
   } finally {
@@ -210,6 +222,7 @@ async function completePractice() {
 
         <!-- Current Turn Actions -->
         <div v-if="isPartnerTurn" class="text-center my-4">
+          <audio ref="partnerAudioRef" preload="auto" style="display:none" />
           <v-btn
             variant="tonal"
             color="primary"
