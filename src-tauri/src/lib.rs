@@ -24,23 +24,44 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .setup(|app| {
-            // Initialize storage
-            let app_data = app.path().app_data_dir().expect("Failed to get app data dir");
-            std::fs::create_dir_all(&app_data).expect("Failed to create app data dir");
-            let db_path = get_db_path(&app_data);
+            // Initialize storage — don't panic, log and continue
+            match app.path().app_data_dir() {
+                Ok(app_data) => {
+                    if let Err(e) = std::fs::create_dir_all(&app_data) {
+                        log::warn!("Failed to create app data dir: {e}. Using in-memory fallback.");
+                        let storage = Storage::open_in_memory().expect("Failed to init in-memory DB");
+                        let app_state = AppState::new(storage);
+                        app.manage(app_state);
+                        return Ok(());
+                    }
 
-            log::info!("Initializing database at: {:?}", db_path);
-            let storage = Storage::open(
-                db_path.to_str().expect("Invalid db path"),
-            )
-            .expect("Failed to initialize database");
+                    let db_path = get_db_path(&app_data);
+                    log::info!("Initializing database at: {:?}", db_path);
 
-            // Initialize app state
-            let app_state = AppState::new(storage);
-            app.manage(app_state);
-
-            log::info!("App initialized successfully");
-            Ok(())
+                    match Storage::open(db_path.to_str().unwrap_or("practice.db")) {
+                        Ok(storage) => {
+                            let app_state = AppState::new(storage);
+                            app.manage(app_state);
+                            log::info!("App initialized successfully");
+                            Ok(())
+                        }
+                        Err(e) => {
+                            log::warn!("Failed to open database: {e}. Using in-memory fallback.");
+                            let storage = Storage::open_in_memory().expect("Failed to init in-memory DB");
+                            let app_state = AppState::new(storage);
+                            app.manage(app_state);
+                            Ok(())
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::warn!("Failed to get app data dir: {e}. Using in-memory fallback.");
+                    let storage = Storage::open_in_memory().expect("Failed to init in-memory DB");
+                    let app_state = AppState::new(storage);
+                    app.manage(app_state);
+                    Ok(())
+                }
+            }
         })
         .invoke_handler(tauri::generate_handler![
             // Existing commands

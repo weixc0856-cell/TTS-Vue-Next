@@ -138,32 +138,36 @@ pub async fn split_sentences(text: String) -> Result<Vec<String>, String> {
 #[command]
 pub async fn seed_content(app: AppHandle) -> Result<Vec<String>, String> {
     let state = app.state::<AppState>();
-    let resource_dir = app
-        .path()
-        .resource_dir()
-        .map_err(|e| format!("Failed to get resource dir: {e}"))?;
 
-    let scenarios_dir = resource_dir.join("assets").join("scenarios");
+    // Try multiple locations to find scenarios directory
+    let candidates = [
+        // 1. Bundled resource path (production)
+        app.path().resource_dir().ok().map(|d| d.join("assets").join("scenarios")),
+        // 2. Compile-time manifest dir (dev: src-tauri/)
+        Some(std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets").join("scenarios")),
+        // 3. From manifest parent (project root + src-tauri/)
+        Some(std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .parent().unwrap()
+            .join("src-tauri").join("assets").join("scenarios")),
+        // 4. CWD + src-tauri/
+        std::env::current_dir().ok()
+            .map(|d| d.join("src-tauri").join("assets").join("scenarios")),
+        // 5. CWD directly
+        std::env::current_dir().ok()
+            .map(|d| d.join("assets").join("scenarios")),
+    ];
 
-    // If resource dir doesn't have scenarios, try development path
-    let scenarios_dir = if scenarios_dir.exists() {
-        scenarios_dir
-    } else {
-        // Fallback: check relative to manifest dir or cwd
-        let dev_path: std::path::PathBuf = [
-            env!("CARGO_MANIFEST_DIR"),
-            "assets",
-            "scenarios",
-        ]
-        .iter()
-        .collect();
-        if dev_path.exists() {
-            dev_path
-        } else {
-            return Err("Scenarios directory not found".to_string());
+    let scenarios_dir = candidates.iter().flatten().find(|p| p.exists()).cloned();
+
+    let scenarios_dir = match scenarios_dir {
+        Some(d) => d,
+        None => {
+            log::warn!("No scenarios directory found — exercises will be empty");
+            return Ok(Vec::new());
         }
     };
 
+    log::info!("Found scenarios at: {:?}", scenarios_dir);
     let content = state.content.lock().map_err(|e| e.to_string())?;
     let seeded = content
         .seed_from_directory(&scenarios_dir)
