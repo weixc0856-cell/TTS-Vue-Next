@@ -374,3 +374,9 @@ pub async fn get_practice_stats(
         .get_practice_stats()
         .map_err(|e| e.to_string())
 }
+
+/// Look up phonemes for a word (returns ARPABET notation)
+#[command]
+pub async fn lookup_phonemes(word: String) -> Result<Option<Vec<String>>, String> {
+    Ok(assessment_engine::phoneme::lookup_phonemes(&word))
+}

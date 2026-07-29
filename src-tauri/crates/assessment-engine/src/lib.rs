@@ -6,6 +6,8 @@ use speech_engine::Audio;
 pub mod phoneme;
 pub mod wer;
 
+pub use phoneme::lookup_phonemes;
+
 /// Errors from pronunciation assessment
 #[derive(Debug, Error)]
 pub enum AssessmentError {

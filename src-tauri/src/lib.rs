@@ -87,6 +87,7 @@ pub fn run() {
             commands::practice::split_sentences,
             commands::practice::get_session_history,
             commands::practice::get_practice_stats,
+            commands::practice::lookup_phonemes,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

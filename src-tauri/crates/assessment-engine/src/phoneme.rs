@@ -208,6 +208,12 @@ impl Default for PhonemeDictionary {
     }
 }
 
+/// Public lookup function: returns phonemes for a word
+pub fn lookup_phonemes(word: &str) -> Option<Vec<String>> {
+    let dict = load_dictionary();
+    dict.get(word).cloned()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

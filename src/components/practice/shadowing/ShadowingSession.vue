@@ -12,6 +12,7 @@ import AudioVisualizer from '../shared/AudioVisualizer.vue';
 import ScoreCard from '../shared/ScoreCard.vue';
 import WordScoreList from '../shared/WordScoreList.vue';
 import SessionProgress from '../shared/SessionProgress.vue';
+import WordPopover from '../shared/WordPopover.vue';
 import type { Exercise, Sentence, ScoreResult } from '../../../types/practice';
 
 const props = withDefaults(
@@ -86,6 +87,26 @@ watch(currentIndex, () => {
   currentStep.value = 'listen';
   setTimeout(() => playReference(), 200);
 });
+
+// Word popover
+const popoverWord = ref('');
+const popoverPhonemes = ref<string[]>([]);
+const popoverVisible = ref(false);
+const popoverX = ref(0);
+const popoverY = ref(0);
+
+async function onWordClick(word: string, event: MouseEvent) {
+  try {
+    const phonemes = await invoke<string[] | null>('lookup_phonemes', { word: word.replace(/[^a-zA-Z]/g, '') });
+    if (phonemes && phonemes.length > 0) {
+      popoverWord.value = word.replace(/[^a-zA-Z]/g, '');
+      popoverPhonemes.value = phonemes;
+      popoverX.value = event.clientX;
+      popoverY.value = event.clientY;
+      popoverVisible.value = true;
+    }
+  } catch { /* silently ignore */ }
+}
 
 const audioRef = ref<HTMLAudioElement | null>(null);
 
@@ -216,17 +237,32 @@ async function completePractice() {
           </v-chip>
         </div>
 
-        <!-- Sentence Display -->
+        <!-- Sentence Display with clickable words -->
         <v-card flat class="sentence-panel glass-panel my-3">
           <v-card-text class="text-center py-4">
-            <div class="text-h6 font-weight-medium mb-2">
-              {{ currentSentence.text }}
+            <div class="word-container text-h6 font-weight-medium mb-2">
+              <span
+                v-for="(word, wi) in currentSentence.text.split(/(\s+)/)"
+                :key="wi"
+                :class="['word-span', { 'word-clickable': word.trim().length > 0 }]"
+                @click="word.trim().length > 0 && onWordClick(word, $event)">
+                {{ word }}
+              </span>
             </div>
             <div v-if="currentSentence.translation" class="text-body-2 text-medium-emphasis">
               {{ currentSentence.translation }}
             </div>
           </v-card-text>
         </v-card>
+
+        <!-- Word Phoneme Popover -->
+        <WordPopover
+          :word="popoverWord"
+          :phonemes="popoverPhonemes"
+          :visible="popoverVisible"
+          :x="popoverX"
+          :y="popoverY"
+          @close="popoverVisible = false" />
 
         <!-- Listen Step -->
         <div v-if="currentStep === 'listen'" class="text-center my-4">
@@ -315,5 +351,22 @@ async function completePractice() {
 .recording-visualizer {
   width: 100%;
   max-width: 400px;
+}
+
+.word-container {
+  line-height: 1.8;
+}
+
+.word-clickable {
+  cursor: pointer;
+  border-bottom: 1px dashed rgba(var(--v-theme-primary), 0.25);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  padding: 0 1px;
+  border-radius: 3px;
+}
+
+.word-clickable:hover {
+  border-bottom-color: rgba(var(--v-theme-primary), 0.7);
+  background: rgba(var(--v-theme-primary), 0.05);
 }
 </style>
