@@ -146,15 +146,18 @@ onMounted(() => {
   min-height: 100vh;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-
   box-sizing: border-box;
 }
 
 .app-sidebar {
   align-self: stretch;
-  padding: 10px 0px;
+  padding: 8px 4px;
   display: flex;
   flex-direction: column;
+  border-right: 1px solid rgba(var(--v-theme-glass-border), 0.3);
+  background: rgba(var(--v-theme-glass), 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .app-sidebar__brand {

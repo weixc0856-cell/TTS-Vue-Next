@@ -16,10 +16,7 @@ import WordPopover from '../shared/WordPopover.vue';
 import type { Exercise, Sentence, ScoreResult } from '../../../types/practice';
 
 const props = withDefaults(
-  defineProps<{
-    exerciseId?: string | null;
-    text?: string | null;
-  }>(),
+  defineProps<{ exerciseId?: string | null; text?: string | null }>(),
   { exerciseId: null, text: null },
 );
 
@@ -35,6 +32,7 @@ const exercise = ref<Exercise | null>(null);
 const sentences = ref<Sentence[]>([]);
 const loading = ref(true);
 const autoPlaying = ref(false);
+const audioRef = ref<HTMLAudioElement | null>(null);
 
 type Step = 'listen' | 'record' | 'result';
 const currentStep = ref<Step>('listen');
@@ -44,6 +42,28 @@ const currentSentence = computed(() => sentences.value[currentIndex.value] || nu
 const isComplete = computed(() => sentences.value.length > 0 && currentIndex.value >= sentences.value.length);
 const hasPrev = computed(() => currentIndex.value > 0);
 const hasNext = computed(() => currentIndex.value < sentences.value.length - 1);
+
+// Word popover
+const popoverWord = ref('');
+const popoverPhonemes = ref<string[]>([]);
+const popoverVisible = ref(false);
+const popoverX = ref(0);
+const popoverY = ref(0);
+
+async function onWordClick(word: string, event: MouseEvent) {
+  try {
+    const clean = word.replace(/[^a-zA-Z]/g, '');
+    if (!clean) return;
+    const phonemes = await invoke<string[] | null>('lookup_phonemes', { word: clean });
+    if (phonemes && phonemes.length > 0) {
+      popoverWord.value = clean;
+      popoverPhonemes.value = phonemes;
+      popoverX.value = event.clientX;
+      popoverY.value = event.clientY;
+      popoverVisible.value = true;
+    }
+  } catch { /* ignore */ }
+}
 
 onMounted(async () => {
   try {
@@ -57,23 +77,23 @@ onMounted(async () => {
       exercise.value = ex;
       sentences.value = ex.sentences;
     } else if (inputText) {
-      const sentenceList = await invoke<string[]>('split_sentences', { text: inputText });
-      sentences.value = (sentenceList.length ? sentenceList : [inputText]).map((s, i) => ({
+      const list = await invoke<string[]>('split_sentences', { text: inputText });
+      sentences.value = (list.length ? list : [inputText]).map((s, i) => ({
         id: `custom-${i}`, text: s, orderIndex: i,
       }));
     } else {
-      const exercises = await invoke<Exercise[]>('list_exercises', { mode: 'shadowing', category: null, difficulty: null });
+      const exercises = await invoke<Exercise[]>('list_exercises', {
+        mode: 'shadowing', category: null, difficulty: null,
+      });
       if (exercises.length > 0) {
-        const ex = exercises[0];
-        exercise.value = ex;
-        sentences.value = ex.sentences;
+        exercise.value = exercises[0];
+        sentences.value = exercises[0].sentences;
       }
     }
 
     if (sentences.value.length > 0) {
       await session.startSession(exercise.value?.id || 'custom', 'shadowing');
-      // Auto-play first sentence
-      setTimeout(() => playReference(), 300);
+      setTimeout(() => playReference(), 400);
     }
   } catch (e) {
     message.error(String(e));
@@ -82,33 +102,12 @@ onMounted(async () => {
   }
 });
 
-// Watch for exercise selection changes
 watch(currentIndex, () => {
   currentStep.value = 'listen';
-  setTimeout(() => playReference(), 200);
+  scoring.clearScore();
+  recorder.reset();
+  setTimeout(() => playReference(), 350);
 });
-
-// Word popover
-const popoverWord = ref('');
-const popoverPhonemes = ref<string[]>([]);
-const popoverVisible = ref(false);
-const popoverX = ref(0);
-const popoverY = ref(0);
-
-async function onWordClick(word: string, event: MouseEvent) {
-  try {
-    const phonemes = await invoke<string[] | null>('lookup_phonemes', { word: word.replace(/[^a-zA-Z]/g, '') });
-    if (phonemes && phonemes.length > 0) {
-      popoverWord.value = word.replace(/[^a-zA-Z]/g, '');
-      popoverPhonemes.value = phonemes;
-      popoverX.value = event.clientX;
-      popoverY.value = event.clientY;
-      popoverVisible.value = true;
-    }
-  } catch { /* silently ignore */ }
-}
-
-const audioRef = ref<HTMLAudioElement | null>(null);
 
 async function playReference() {
   if (!currentSentence.value) return;
@@ -124,12 +123,10 @@ async function playReference() {
         max_retries: 2,
       },
     });
-
     const bytes = new Uint8Array(audioData);
     let binary = '';
     for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
     const dataUri = `data:audio/mpeg;base64,${btoa(binary)}`;
-
     if (audioRef.value) {
       audioRef.value.src = dataUri;
       await audioRef.value.play().catch(() => {});
@@ -143,54 +140,34 @@ async function playReference() {
 
 async function onRecorded(audioData: Uint8Array, durationMs: number) {
   if (!currentSentence.value || !session.currentSessionId) return;
-
   try {
     const result = await invoke<ScoreResult>('transcribe_and_score', {
       referenceText: currentSentence.value.text,
-      audioData: Array.from(audioData),
-      durationMs,
+      audioData: Array.from(audioData), durationMs,
       whisperBinPath: settingsStore.whisperBinPath || null,
       whisperModelPath: settingsStore.whisperModelPath || null,
     });
-
     scoring.setScore(result);
-
     await invoke('record_attempt', {
-      sessionId: session.currentSessionId,
-      sentenceId: currentSentence.value.id,
-      referenceText: currentSentence.value.text,
-      audioData: Array.from(audioData),
-      durationMs,
-      whisperBinPath: settingsStore.whisperBinPath || null,
+      sessionId: session.currentSessionId, sentenceId: currentSentence.value.id,
+      referenceText: currentSentence.value.text, audioData: Array.from(audioData),
+      durationMs, whisperBinPath: settingsStore.whisperBinPath || null,
       whisperModelPath: settingsStore.whisperModelPath || null,
     });
-
     currentStep.value = 'result';
   } catch (e) {
     message.error(String(e));
   }
 }
 
-function startRecording() {
-  currentStep.value = 'record';
-}
+function startRecording() { currentStep.value = 'record'; }
 
 function nextSentence() {
-  if (hasNext.value) {
-    session.nextSentence();
-    scoring.clearScore();
-    recorder.reset();
-  } else {
-    completePractice();
-  }
+  if (hasNext.value) { session.nextSentence(); } else { completePractice(); }
 }
 
 function prevSentence() {
-  if (hasPrev.value) {
-    session.prevSentence();
-    scoring.clearScore();
-    recorder.reset();
-  }
+  if (hasPrev.value) { session.prevSentence(); }
 }
 
 async function completePractice() {
@@ -207,166 +184,220 @@ async function completePractice() {
     <audio ref="audioRef" preload="auto" style="display:none" />
 
     <div v-if="loading" class="d-flex justify-center align-center py-12">
-      <v-progress-circular indeterminate size="32" />
+      <v-progress-circular indeterminate size="28" color="primary" />
     </div>
 
     <template v-else-if="isComplete">
-      <div class="text-center py-8">
-        <v-icon size="56" color="success" class="mb-3">mdi-check-circle</v-icon>
-        <h3 class="text-h5 mb-2">{{ $t('practice.shadowing.complete') }}</h3>
-        <v-btn color="primary" variant="tonal" @click="completePractice">
-          {{ $t('practice.actions.backToHub') }}
+      <div class="text-center py-12">
+        <div class="complete-check mb-4">✓</div>
+        <h3 class="text-h4 font-weight-bold mb-2">Practice Complete</h3>
+        <p class="text-body-1 text-medium-emphasis mb-6">Great session!</p>
+        <v-btn color="primary" variant="tonal" size="large" class="px-8" @click="completePractice">
+          Back to Hub
         </v-btn>
       </div>
     </template>
 
     <template v-else-if="currentSentence">
-      <div class="shadowing-workspace">
-        <SessionProgress :current="currentIndex + 1" :total="sentences.length" />
-
-        <!-- Step indicator -->
-        <div class="step-indicator d-flex justify-center ga-2 my-2">
-          <v-chip size="x-small" :color="currentStep === 'listen' ? 'primary' : 'success'" variant="tonal">
-            1. Listen
-          </v-chip>
-          <v-chip size="x-small" :color="currentStep === 'record' ? 'error' : currentStep === 'result' ? 'success' : ''" variant="tonal">
-            2. Record
-          </v-chip>
-          <v-chip size="x-small" :color="currentStep === 'result' ? 'success' : ''" variant="tonal">
-            3. Score
-          </v-chip>
+      <div class="session-content">
+        <!-- Progress + Back -->
+        <div class="d-flex align-center ga-3 mb-4">
+          <v-btn variant="text" icon="mdi-arrow-left" size="small" color="secondary" @click="router.push('/practice')" />
+          <div class="flex-grow-1">
+            <SessionProgress :current="currentIndex + 1" :total="sentences.length" />
+          </div>
         </div>
 
-        <!-- Sentence Display with clickable words -->
-        <v-card flat class="sentence-panel glass-panel my-3">
-          <v-card-text class="text-center py-4">
-            <div class="word-container text-h6 font-weight-medium mb-2">
-              <span
-                v-for="(word, wi) in currentSentence.text.split(/(\s+)/)"
-                :key="wi"
+        <!-- Step pills -->
+        <div class="d-flex justify-center ga-2 mb-4">
+          <div :class="['step-pill', { 'step-active': currentStep === 'listen', 'step-done': false }]">
+            <v-icon size="14" class="mr-1">1</v-icon> Listen
+          </div>
+          <div class="step-connector" />
+          <div :class="['step-pill', { 'step-active': currentStep === 'record', 'step-done': currentStep === 'result' }]">
+            <v-icon size="14" class="mr-1">{{ currentStep === 'result' ? 'mdi-check' : '2' }}</v-icon> Speak
+          </div>
+          <div class="step-connector" />
+          <div :class="['step-pill', { 'step-active': currentStep === 'result' }]">
+            <v-icon size="14" class="mr-1">3</v-icon> Review
+          </div>
+        </div>
+
+        <!-- Sentence Card -->
+        <v-card flat class="sentence-card mb-4">
+          <v-card-text class="pa-5">
+            <div class="sentence-text">
+              <span v-for="(word, wi) in currentSentence.text.split(/(\s+)/)" :key="wi"
                 :class="['word-span', { 'word-clickable': word.trim().length > 0 }]"
-                @click="word.trim().length > 0 && onWordClick(word, $event)">
-                {{ word }}
-              </span>
+                @click="word.trim().length > 0 && onWordClick(word, $event)">{{ word }}</span>
             </div>
-            <div v-if="currentSentence.translation" class="text-body-2 text-medium-emphasis">
+            <div v-if="currentSentence.translation" class="sentence-translation">
               {{ currentSentence.translation }}
             </div>
           </v-card-text>
         </v-card>
 
-        <!-- Word Phoneme Popover -->
+        <!-- Word Popover -->
         <WordPopover
-          :word="popoverWord"
-          :phonemes="popoverPhonemes"
-          :visible="popoverVisible"
-          :x="popoverX"
-          :y="popoverY"
+          :word="popoverWord" :phonemes="popoverPhonemes"
+          :visible="popoverVisible" :x="popoverX" :y="popoverY"
           @close="popoverVisible = false" />
 
         <!-- Listen Step -->
-        <div v-if="currentStep === 'listen'" class="text-center my-4">
-          <v-btn
-            variant="tonal"
-            color="primary"
-            size="large"
-            :loading="autoPlaying"
-            prepend-icon="mdi-play-circle"
-            @click="playReference">
-            {{ $t('practice.shadowing.playReference') }}
+        <div v-if="currentStep === 'listen'" class="step-section">
+          <div class="step-section__icon mb-3">🎧</div>
+          <v-btn variant="tonal" color="primary" size="large" :loading="autoPlaying"
+            prepend-icon="mdi-play-circle" class="px-6" @click="playReference">
+            Listen
           </v-btn>
-          <div class="text-caption text-medium-emphasis mt-2">
-            Listen to the reference audio, then click Record.
-          </div>
-          <v-btn variant="text" color="primary" class="mt-2" @click="startRecording">
-            Ready — Start Recording →
+          <div class="text-caption text-medium-emphasis mt-3 mb-4">Listen to the reference, then record yourself</div>
+          <v-btn variant="text" color="primary" @click="startRecording">
+            Ready → Start Recording
           </v-btn>
         </div>
 
         <!-- Record Step -->
-        <div v-if="currentStep === 'record'" class="d-flex flex-column align-center my-4">
-          <RecordButton
-            size="large"
-            @recorded="onRecorded"
-            @error="(msg) => message.error(msg)" />
-          <AudioVisualizer
-            :audio-level="recorder.audioLevel"
-            :is-active="recorder.status === 'recording'"
-            class="mt-2 recording-visualizer"
-            :height="40"
-            :bars="24" />
-          <v-btn variant="text" size="small" class="mt-2" @click="playReference">
-            🔄 Listen again
+        <div v-if="currentStep === 'record'" class="step-section">
+          <RecordButton size="large" @recorded="onRecorded" @error="(msg) => message.error(msg)" />
+          <AudioVisualizer :audio-level="recorder.audioLevel" :is-active="recorder.status === 'recording'"
+            class="mt-3 recording-viz" :height="36" :bars="20" />
+          <v-btn variant="text" size="small" color="secondary" class="mt-2" @click="playReference">
+            <v-icon size="14" class="mr-1">mdi-repeat</v-icon> Listen again
           </v-btn>
         </div>
 
         <!-- Result Step -->
-        <template v-if="currentStep === 'result' && scoring.lastScore">
+        <div v-if="currentStep === 'result' && scoring.lastScore" class="step-section">
           <ScoreCard :score="scoring.lastScore" class="mb-3" />
-          <WordScoreList :word-scores="scoring.lastScore.wordScores" class="mb-3" />
-
+          <WordScoreList :word-scores="scoring.lastScore.wordScores" class="mb-4" />
           <div class="d-flex justify-center ga-3">
-            <v-btn variant="text" @click="prevSentence" :disabled="!hasPrev">
-              ← Prev
-            </v-btn>
-            <v-btn
-              color="primary"
-              variant="tonal"
-              @click="nextSentence">
-              {{ hasNext ? 'Next →' : 'Finish →' }}
+            <v-btn variant="text" @click="prevSentence" :disabled="!hasPrev" class="px-4">← Prev</v-btn>
+            <v-btn color="primary" variant="tonal" class="px-6" @click="nextSentence">
+              {{ hasNext ? 'Next' : 'Finish' }} →
             </v-btn>
           </div>
-        </template>
+        </div>
       </div>
     </template>
-
-    <div v-else class="text-center py-8 text-medium-emphasis">
-      No sentences available
-    </div>
   </v-container>
 </template>
 
 <style scoped>
 .shadowing-session {
-  padding: 10px;
+  padding: 20px;
   height: 100%;
+  overflow-y: auto;
   background:
-    radial-gradient(circle at top right, rgba(var(--v-theme-primary), 0.08), transparent 22%),
-    linear-gradient(180deg, rgba(var(--v-theme-surface), 1), rgba(var(--v-theme-surface), 0.98));
+    radial-gradient(circle at 20% 10%, rgba(var(--v-theme-primary), 0.05), transparent 28%),
+    radial-gradient(circle at 80% 90%, rgba(var(--v-theme-info), 0.04), transparent 24%),
+    rgb(var(--v-theme-background));
 }
 
-.shadowing-workspace {
-  max-width: 650px;
+.session-content {
+  max-width: 560px;
   margin: 0 auto;
 }
 
-.sentence-panel {
-  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-  background:
-    radial-gradient(circle at top right, rgba(var(--v-theme-primary), 0.1), transparent 30%),
-    rgba(var(--v-theme-surface), 0.78);
-  backdrop-filter: blur(18px);
+/* Step pills */
+.step-pill {
+  display: flex;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: rgba(var(--v-theme-glass), 0.4);
+  color: rgba(var(--v-theme-on-surface), 0.4);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
 }
 
-.recording-visualizer {
-  width: 100%;
-  max-width: 400px;
+.step-active {
+  background: rgba(var(--v-theme-primary), 0.1);
+  color: rgb(var(--v-theme-primary));
+  border-color: rgba(var(--v-theme-primary), 0.2);
 }
 
-.word-container {
+.step-done {
+  background: rgba(var(--v-theme-success), 0.1);
+  color: rgb(var(--v-theme-success));
+  border-color: rgba(var(--v-theme-success), 0.2);
+}
+
+.step-connector {
+  width: 16px;
+  height: 1px;
+  background: rgba(var(--v-theme-on-surface), 0.15);
+}
+
+/* Sentence card */
+.sentence-card {
+  border-radius: 20px !important;
+  border: 1px solid rgba(var(--v-theme-glass-border), 0.35);
+  background: rgba(var(--v-theme-glass), 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.sentence-text {
+  font-size: 1.15rem;
+  font-weight: 500;
   line-height: 1.8;
+  letter-spacing: -0.01em;
+  color: rgb(var(--v-theme-on-surface));
 }
 
+.sentence-translation {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(var(--v-theme-glass-border), 0.25);
+  font-size: 0.85rem;
+  color: rgba(var(--v-theme-on-surface), 0.5);
+}
+
+/* Clickable words */
 .word-clickable {
   cursor: pointer;
-  border-bottom: 1px dashed rgba(var(--v-theme-primary), 0.25);
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  border-bottom: 1px dashed rgba(var(--v-theme-primary), 0.2);
+  transition: all 0.15s ease;
   padding: 0 1px;
   border-radius: 3px;
 }
-
 .word-clickable:hover {
-  border-bottom-color: rgba(var(--v-theme-primary), 0.7);
-  background: rgba(var(--v-theme-primary), 0.05);
+  border-bottom-color: rgba(var(--v-theme-primary), 0.6);
+  background: rgba(var(--v-theme-primary), 0.06);
+}
+
+/* Step sections */
+.step-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.step-section__icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.recording-viz {
+  width: 100%;
+  max-width: 320px;
+}
+
+/* Complete */
+.complete-check {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(var(--v-theme-success), 0.12);
+  color: rgb(var(--v-theme-success));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
 }
 </style>
