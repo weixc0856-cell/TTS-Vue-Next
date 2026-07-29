@@ -1,0 +1,16 @@
+{
+    "id": "dialogue-doctor",
+    "title": "Doctor's Appointment",
+    "difficulty": "intermediate",
+    "category": "daily",
+    "exchanges": [
+        {"role": "A", "text": "Good morning. Please have a seat. What seems to be the problem?", "translation": "早上好。请坐。哪里不舒服？"},
+        {"role": "B", "text": "I've had a sore throat and a cough for the past three days.", "translation": "我过去三天一直喉咙痛和咳嗽。"},
+        {"role": "A", "text": "Do you have a fever?", "translation": "发烧吗？"},
+        {"role": "B", "text": "I think so. I felt warm last night.", "translation": "我觉得有。昨晚感觉有点热。"},
+        {"role": "A", "text": "Let me take your temperature. Yes, you have a slight fever.", "translation": "让我量一下体温。是的，有点发烧。"},
+        {"role": "B", "text": "Do I need any medicine?", "translation": "需要吃药吗？"},
+        {"role": "A", "text": "I'll prescribe some antibiotics. Make sure to rest and drink plenty of water.", "translation": "我开一些抗生素。注意休息，多喝水。"},
+        {"role": "B", "text": "Thank you, doctor.", "translation": "谢谢医生。"}
+    ]
+}

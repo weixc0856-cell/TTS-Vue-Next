@@ -1,0 +1,14 @@
+{
+    "id": "shadowing-coffee-shop",
+    "title": "Coffee Shop Order",
+    "mode": "shadowing",
+    "difficulty": "beginner",
+    "category": "daily",
+    "sentences": [
+        {"text": "Welcome to Starbucks. What can I get for you today?", "translation": "欢迎来到星巴克。今天想喝点什么？"},
+        {"text": "I'd like a latte, please.", "translation": "请给我一杯拿铁。"},
+        {"text": "Sure. What size would you like?", "translation": "好的。请问要什么杯型？"},
+        {"text": "Grande, please. And I'll have it iced.", "translation": "中杯，谢谢。我要冰的。"},
+        {"text": "That'll be five dollars and fifty cents.", "translation": "一共五美元五十美分。"}
+    ]
+}

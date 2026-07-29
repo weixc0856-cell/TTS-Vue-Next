@@ -1,0 +1,16 @@
+{
+    "id": "dialogue-restaurant",
+    "title": "Restaurant Ordering",
+    "difficulty": "beginner",
+    "category": "daily",
+    "exchanges": [
+        {"role": "A", "text": "Welcome to Bella Italia. A table for one?", "translation": "欢迎来到 Bella Italia。一位吗？"},
+        {"role": "B", "text": "Yes, please.", "translation": "是的，谢谢。"},
+        {"role": "A", "text": "Right this way. Here's the menu.", "translation": "这边请。这是菜单。"},
+        {"role": "B", "text": "Thank you. What would you recommend?", "translation": "谢谢。你有什么推荐吗？"},
+        {"role": "A", "text": "Our spaghetti carbonara is very popular.", "translation": "我们的奶油培根意面很受欢迎。"},
+        {"role": "B", "text": "I'll have that, and a glass of water please.", "translation": "我就要那个，再加一杯水。"},
+        {"role": "A", "text": "Great choice. I'll put that order in right away.", "translation": "好选择。我马上去下单。"},
+        {"role": "B", "text": "Thank you very much.", "translation": "非常感谢。"}
+    ]
+}

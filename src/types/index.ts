@@ -43,8 +43,12 @@ export interface TtsSettings {
   autoplay: boolean;
   language: AppLanguage;
   themeMode: ThemeMode;
+  whisperBinPath: string;
+  whisperModelPath: string;
+  whisperModelSize: WhisperModelSize;
 }
 
 export type OutputFormat = "mp3" | "wav" | "ogg" | "flac";
 export type AppLanguage = "zh-CN" | "en-US";
 export type ThemeMode = "system" | "light" | "dark";
+export type WhisperModelSize = "base.en" | "small.en" | "tiny.en";

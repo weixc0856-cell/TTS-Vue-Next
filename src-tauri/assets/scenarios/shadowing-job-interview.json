@@ -1,0 +1,16 @@
+{
+    "id": "shadowing-job-interview",
+    "title": "Job Interview",
+    "mode": "shadowing",
+    "difficulty": "advanced",
+    "category": "business",
+    "sentences": [
+        {"text": "Thank you for coming in today. Could you tell me about yourself?", "translation": "感谢你今天来面试。能介绍一下你自己吗？"},
+        {"text": "I have five years of experience in software development.", "translation": "我有五年的软件开发经验。"},
+        {"text": "What do you consider your greatest strength?", "translation": "你认为你最大的优势是什么？"},
+        {"text": "I'm very good at problem-solving and working in teams.", "translation": "我非常擅长解决问题和团队合作。"},
+        {"text": "Where do you see yourself in five years?", "translation": "你觉得自己五年后会是什么样子？"},
+        {"text": "I hope to grow into a leadership role and mentor junior developers.", "translation": "我希望成长为领导角色并指导初级开发者。"},
+        {"text": "We'll be in touch within the week. Thank you for your time.", "translation": "我们会在本周内联系你。感谢你的时间。"}
+    ]
+}

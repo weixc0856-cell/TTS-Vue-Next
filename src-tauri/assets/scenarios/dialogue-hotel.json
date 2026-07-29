@@ -1,0 +1,15 @@
+{
+    "id": "dialogue-hotel",
+    "title": "Hotel Check-in",
+    "difficulty": "beginner",
+    "category": "travel",
+    "exchanges": [
+        {"role": "A", "text": "Good evening. Welcome to Grand Hotel.", "translation": "晚上好。欢迎来到大酒店。"},
+        {"role": "B", "text": "Hi, I have a reservation under the name Smith.", "translation": "你好，我用 Smith 的名字预订了房间。"},
+        {"role": "A", "text": "Let me check. Yes, a deluxe room for three nights. Is that correct?", "translation": "让我查一下。是的，一间豪华房住三晚。对吗？"},
+        {"role": "B", "text": "Yes, that's right.", "translation": "对，没错。"},
+        {"role": "A", "text": "Could I please see your ID and a credit card for the deposit?", "translation": "请问能看一下您的身份证和用于押金的信用卡吗？"},
+        {"role": "B", "text": "Sure, here you go.", "translation": "好的，给你。"},
+        {"role": "A", "text": "Here is your key card. Your room is on the 8th floor. Enjoy your stay!", "translation": "这是您的房卡。您的房间在8楼。祝您入住愉快！"}
+    ]
+}

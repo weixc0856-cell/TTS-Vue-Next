@@ -3,6 +3,7 @@ import type {
   AppLanguage,
   OutputFormat,
   ThemeMode,
+  WhisperModelSize,
   TtsSettings,
 } from "../types";
 
@@ -33,6 +34,9 @@ export const useSettingsStore = defineStore("settings", {
     autoplay: true,
     language: "zh-CN",
     themeMode: "system",
+    whisperBinPath: "",
+    whisperModelPath: "",
+    whisperModelSize: "base.en",
   }),
 
   actions: {
@@ -75,6 +79,15 @@ export const useSettingsStore = defineStore("settings", {
     },
     updateThemeMode(themeMode: ThemeMode) {
       this.$patch({ themeMode });
+    },
+    updateWhisperBinPath(path: string) {
+      this.$patch({ whisperBinPath: path });
+    },
+    updateWhisperModelPath(path: string) {
+      this.$patch({ whisperModelPath: path });
+    },
+    updateWhisperModelSize(size: WhisperModelSize) {
+      this.$patch({ whisperModelSize: size });
     },
   },
 

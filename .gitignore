@@ -24,7 +24,9 @@ dist-ssr
 *.sln
 *.sw?
 
-docs
 CLAUDE.md
 .claude
 .vscode
+.superpowers
+*.bin
+ggml-*

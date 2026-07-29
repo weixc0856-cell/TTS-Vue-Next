@@ -17,6 +17,7 @@ const hasUpdate = ref(false);
 const navItems = computed(() => [
   { title: t("nav.textToSpeech"), icon: "mdi-star", to: "/" },
   { title: t("nav.batchConvert"), icon: "mdi-file-multiple", to: "/batch" },
+  { title: t("nav.practice"), icon: "mdi-voice", to: "/practice" },
   { title: t("nav.settings"), icon: "mdi-cog", to: "/settings" },
 ]);
 

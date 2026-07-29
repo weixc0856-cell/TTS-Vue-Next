@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { useI18n } from "vue-i18n";
 import { useMessage } from "vuetify-message-vue3";
 import { useSettingsStore } from "../stores/settings";
+import WhisperConfig from "../components/practice/shared/WhisperConfig.vue";
 
 const settingsStore = useSettingsStore();
 const message = useMessage();
@@ -58,85 +59,89 @@ async function selectSavePath() {
 
         <v-card-text class="settings-panel__body">
           <div class="settings-panel__content">
-            <section class="settings-group settings-group--primary">
-              <div class="settings-group__header">
-                <v-icon size="18" color="primary">mdi-folder-cog-outline</v-icon>
-                <span class="text-subtitle-1 font-weight-medium">{{
-                  $t("settings.sections.output")
-                }}</span>
-              </div>
-
-              <div class="settings-fields">
-                <div class="settings-field settings-field--full">
-                  <v-text-field
-                    :model-value="settingsStore.savePath"
-                    :label="$t('settings.fields.savePath')"
-                    :placeholder="$t('settings.fields.savePathPlaceholder')"
-                    density="comfortable"
-                    readonly
-                    append-inner-icon="mdi-folder-outline"
-                    @click="selectSavePath" />
+            <div class="settings-panel__row">
+              <section class="settings-group settings-group--primary">
+                <div class="settings-group__header">
+                  <v-icon size="18" color="primary">mdi-folder-cog-outline</v-icon>
+                  <span class="text-subtitle-1 font-weight-medium">{{
+                    $t("settings.sections.output")
+                  }}</span>
                 </div>
 
-                <v-select
-                  :model-value="settingsStore.outputFormat"
-                  :items="formatOptions"
-                  density="comfortable"
-                  :label="$t('settings.fields.defaultFormat')"
-                  @update:model-value="settingsStore.updateOutputFormat" />
+                <div class="settings-fields">
+                  <div class="settings-field settings-field--full">
+                    <v-text-field
+                      :model-value="settingsStore.savePath"
+                      :label="$t('settings.fields.savePath')"
+                      :placeholder="$t('settings.fields.savePathPlaceholder')"
+                      density="comfortable"
+                      readonly
+                      append-inner-icon="mdi-folder-outline"
+                      @click="selectSavePath" />
+                  </div>
 
-                <v-select
-                  :model-value="settingsStore.language"
-                  :items="languageOptions"
-                  density="comfortable"
-                  :label="$t('settings.fields.displayLanguage')"
-                  @update:model-value="settingsStore.updateLanguage" />
-
-                <div class="settings-field settings-field--full">
-                  <v-switch
-                    :model-value="settingsStore.autoplay"
-                    :label="$t('settings.fields.autoplay')"
+                  <v-select
+                    :model-value="settingsStore.outputFormat"
+                    :items="formatOptions"
                     density="comfortable"
-                    color="primary"
-                    hide-details
-                    @update:model-value="
-                      (value) => settingsStore.updateAutoplay(Boolean(value))
-                    " />
+                    :label="$t('settings.fields.defaultFormat')"
+                    @update:model-value="settingsStore.updateOutputFormat" />
+
+                  <v-select
+                    :model-value="settingsStore.language"
+                    :items="languageOptions"
+                    density="comfortable"
+                    :label="$t('settings.fields.displayLanguage')"
+                    @update:model-value="settingsStore.updateLanguage" />
+
+                  <div class="settings-field settings-field--full">
+                    <v-switch
+                      :model-value="settingsStore.autoplay"
+                      :label="$t('settings.fields.autoplay')"
+                      density="comfortable"
+                      color="primary"
+                      hide-details
+                      @update:model-value="
+                        (value) => settingsStore.updateAutoplay(Boolean(value))
+                      " />
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
 
-            <section class="settings-group settings-group--secondary">
-              <div class="settings-group__header">
-                <v-icon size="18" color="primary">mdi-tune-variant</v-icon>
-                <span class="text-subtitle-1 font-weight-medium">{{
-                  $t("settings.sections.processing")
-                }}</span>
-              </div>
+              <section class="settings-group settings-group--secondary">
+                <div class="settings-group__header">
+                  <v-icon size="18" color="primary">mdi-tune-variant</v-icon>
+                  <span class="text-subtitle-1 font-weight-medium">{{
+                    $t("settings.sections.processing")
+                  }}</span>
+                </div>
 
-              <div class="settings-stack">
-                <v-select
-                  :model-value="settingsStore.maxRetries"
-                  :items="retryOptions"
-                  density="comfortable"
-                  :label="$t('settings.fields.maxRetries')"
-                  @update:model-value="settingsStore.updateMaxRetries" />
+                <div class="settings-stack">
+                  <v-select
+                    :model-value="settingsStore.maxRetries"
+                    :items="retryOptions"
+                    density="comfortable"
+                    :label="$t('settings.fields.maxRetries')"
+                    @update:model-value="settingsStore.updateMaxRetries" />
 
-                <v-select
-                  :model-value="settingsStore.fileConcurrency"
-                  :items="concurrencyOptions"
-                  density="comfortable"
-                  :label="$t('settings.fields.fileConcurrency')"
-                  @update:model-value="settingsStore.updateFileConcurrency" />
+                  <v-select
+                    :model-value="settingsStore.fileConcurrency"
+                    :items="concurrencyOptions"
+                    density="comfortable"
+                    :label="$t('settings.fields.fileConcurrency')"
+                    @update:model-value="settingsStore.updateFileConcurrency" />
 
-                <v-select
-                  :model-value="settingsStore.chunkConcurrency"
-                  :items="concurrencyOptions"
-                  density="comfortable"
-                  :label="$t('settings.fields.chunkConcurrency')"
-                  @update:model-value="settingsStore.updateChunkConcurrency" />
-              </div>
-            </section>
+                  <v-select
+                    :model-value="settingsStore.chunkConcurrency"
+                    :items="concurrencyOptions"
+                    density="comfortable"
+                    :label="$t('settings.fields.chunkConcurrency')"
+                    @update:model-value="settingsStore.updateChunkConcurrency" />
+                </div>
+              </section>
+            </div>
+
+            <WhisperConfig />
           </div>
         </v-card-text>
       </v-card>
@@ -195,9 +200,17 @@ async function selectSavePath() {
 .settings-panel__content {
   flex: 1;
   display: flex;
+  flex-direction: column;
   gap: 10px;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.settings-panel__row {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .settings-group {

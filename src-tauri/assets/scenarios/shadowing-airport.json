@@ -1,0 +1,15 @@
+{
+    "id": "shadowing-airport",
+    "title": "Airport Check-in",
+    "mode": "shadowing",
+    "difficulty": "intermediate",
+    "category": "travel",
+    "sentences": [
+        {"text": "Good morning. May I have your passport, please?", "translation": "早上好。请出示您的护照。"},
+        {"text": "Here you go. I'd like a window seat if possible.", "translation": "给您。如果可以的话我想要靠窗的座位。"},
+        {"text": "Certainly. Do you have any luggage to check in?", "translation": "好的。有行李需要托运吗？"},
+        {"text": "Yes, I have one suitcase.", "translation": "有，我有一个行李箱。"},
+        {"text": "Please place it on the scale. Your flight will depart from gate 12.", "translation": "请把它放在秤上。您的航班将在12号登机口起飞。"},
+        {"text": "Here is your boarding pass. Have a pleasant flight!", "translation": "这是您的登机牌。祝您旅途愉快！"}
+    ]
+}

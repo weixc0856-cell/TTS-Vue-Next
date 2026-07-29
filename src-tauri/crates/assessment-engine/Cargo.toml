@@ -1,0 +1,14 @@
+[package]
+name = "assessment-engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+async-trait = "0.1"
+practice-domain = { path = "../practice-domain" }
+speech-engine = { path = "../speech-engine" }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt", "macros"] }
