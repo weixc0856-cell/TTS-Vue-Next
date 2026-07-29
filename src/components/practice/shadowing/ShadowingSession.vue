@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useMessage } from 'vuetify-message-vue3';
 import { invoke } from '@tauri-apps/api/core';
@@ -33,23 +33,21 @@ const scoring = useScoringStore();
 const exercise = ref<Exercise | null>(null);
 const sentences = ref<Sentence[]>([]);
 const loading = ref(true);
+const autoPlaying = ref(false);
+
+type Step = 'listen' | 'record' | 'result';
+const currentStep = ref<Step>('listen');
 
 const currentIndex = computed(() => session.currentSentenceIndex);
 const currentSentence = computed(() => sentences.value[currentIndex.value] || null);
-const isComplete = computed(() => currentIndex.value >= sentences.value.length);
+const isComplete = computed(() => sentences.value.length > 0 && currentIndex.value >= sentences.value.length);
 const hasPrev = computed(() => currentIndex.value > 0);
-const hasNext = computed(() => currentIndex.value < sentences.value.length);
+const hasNext = computed(() => currentIndex.value < sentences.value.length - 1);
 
 onMounted(async () => {
   try {
-    // Seed content if not already done
-    try {
-      await invoke('seed_content');
-    } catch {
-      // ignore — already seeded
-    }
+    try { await invoke('seed_content'); } catch { /* ok */ }
 
-    // Load from route query (passed via navigation)
     const id = props.exerciseId || route.query.exerciseId as string;
     const inputText = props.text || route.query.text as string;
 
@@ -58,24 +56,12 @@ onMounted(async () => {
       exercise.value = ex;
       sentences.value = ex.sentences;
     } else if (inputText) {
-      // Create custom exercise from text
-      const sentences_list = await invoke<string[]>('split_sentences', { text: inputText });
-      if (sentences_list.length === 0) {
-        sentences_list.push(inputText);
-      }
-      // No translations for user text
-      sentences.value = sentences_list.map((s, i) => ({
-        id: `custom-${i}`,
-        text: s,
-        orderIndex: i,
+      const sentenceList = await invoke<string[]>('split_sentences', { text: inputText });
+      sentences.value = (sentenceList.length ? sentenceList : [inputText]).map((s, i) => ({
+        id: `custom-${i}`, text: s, orderIndex: i,
       }));
     } else {
-      // No exercise specified, load all shadowing exercises
-      const exercises = await invoke<Exercise[]>('list_exercises', {
-        mode: 'shadowing',
-        category: null,
-        difficulty: null,
-      });
+      const exercises = await invoke<Exercise[]>('list_exercises', { mode: 'shadowing', category: null, difficulty: null });
       if (exercises.length > 0) {
         const ex = exercises[0];
         exercise.value = ex;
@@ -84,10 +70,9 @@ onMounted(async () => {
     }
 
     if (sentences.value.length > 0) {
-      await session.startSession(
-        exercise.value?.id || 'custom',
-        'shadowing',
-      );
+      await session.startSession(exercise.value?.id || 'custom', 'shadowing');
+      // Auto-play first sentence
+      setTimeout(() => playReference(), 300);
     }
   } catch (e) {
     message.error(String(e));
@@ -96,32 +81,33 @@ onMounted(async () => {
   }
 });
 
+// Watch for exercise selection changes
+watch(currentIndex, () => {
+  currentStep.value = 'listen';
+  setTimeout(() => playReference(), 200);
+});
+
 const audioRef = ref<HTMLAudioElement | null>(null);
 
 async function playReference() {
   if (!currentSentence.value) return;
+  autoPlaying.value = true;
   try {
     const audioData = await invoke<number[]>('tts_convert', {
       params: {
         text: currentSentence.value.text,
         voice: 'en-US-EmmaMultilingualNeural',
-        rate: '+0%',
-        pitch: '+0Hz',
-        volume: '+0%',
+        rate: '+0%', pitch: '+0Hz', volume: '+0%',
         format: 'audio-24khz-48kbitrate-mono-mp3',
         task_id: `shadowing-${Date.now()}`,
         max_retries: 2,
       },
     });
 
-    // Play the returned audio using base64 data URI (works in all Tauri webviews)
     const bytes = new Uint8Array(audioData);
     let binary = '';
-    for (let i = 0; i < bytes.length; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    const base64 = btoa(binary);
-    const dataUri = `data:audio/mpeg;base64,${base64}`;
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    const dataUri = `data:audio/mpeg;base64,${btoa(binary)}`;
 
     if (audioRef.value) {
       audioRef.value.src = dataUri;
@@ -129,6 +115,8 @@ async function playReference() {
     }
   } catch (e) {
     message.error(String(e));
+  } finally {
+    autoPlaying.value = false;
   }
 }
 
@@ -136,7 +124,6 @@ async function onRecorded(audioData: Uint8Array, durationMs: number) {
   if (!currentSentence.value || !session.currentSessionId) return;
 
   try {
-    // Transcribe and score
     const result = await invoke<ScoreResult>('transcribe_and_score', {
       referenceText: currentSentence.value.text,
       audioData: Array.from(audioData),
@@ -147,7 +134,6 @@ async function onRecorded(audioData: Uint8Array, durationMs: number) {
 
     scoring.setScore(result);
 
-    // Record the attempt
     await invoke('record_attempt', {
       sessionId: session.currentSessionId,
       sentenceId: currentSentence.value.id,
@@ -157,9 +143,15 @@ async function onRecorded(audioData: Uint8Array, durationMs: number) {
       whisperBinPath: settingsStore.whisperBinPath || null,
       whisperModelPath: settingsStore.whisperModelPath || null,
     });
+
+    currentStep.value = 'result';
   } catch (e) {
     message.error(String(e));
   }
+}
+
+function startRecording() {
+  currentStep.value = 'record';
 }
 
 function nextSentence() {
@@ -167,6 +159,8 @@ function nextSentence() {
     session.nextSentence();
     scoring.clearScore();
     recorder.reset();
+  } else {
+    completePractice();
   }
 }
 
@@ -182,15 +176,15 @@ async function completePractice() {
   try {
     const score = await session.endSession();
     message.success(`Practice complete! Score: ${Math.round(score)}/100`);
-  } catch {
-    // Session may not exist
-  }
+  } catch { /* ok */ }
   router.push('/practice');
 }
 </script>
 
 <template>
   <v-container fluid class="shadowing-session">
+    <audio ref="audioRef" preload="auto" style="display:none" />
+
     <div v-if="loading" class="d-flex justify-center align-center py-12">
       <v-progress-circular indeterminate size="32" />
     </div>
@@ -207,11 +201,23 @@ async function completePractice() {
 
     <template v-else-if="currentSentence">
       <div class="shadowing-workspace">
-        <!-- Progress -->
         <SessionProgress :current="currentIndex + 1" :total="sentences.length" />
 
+        <!-- Step indicator -->
+        <div class="step-indicator d-flex justify-center ga-2 my-2">
+          <v-chip size="x-small" :color="currentStep === 'listen' ? 'primary' : 'success'" variant="tonal">
+            1. Listen
+          </v-chip>
+          <v-chip size="x-small" :color="currentStep === 'record' ? 'error' : currentStep === 'result' ? 'success' : ''" variant="tonal">
+            2. Record
+          </v-chip>
+          <v-chip size="x-small" :color="currentStep === 'result' ? 'success' : ''" variant="tonal">
+            3. Score
+          </v-chip>
+        </div>
+
         <!-- Sentence Display -->
-        <v-card flat class="sentence-panel glass-panel my-4">
+        <v-card flat class="sentence-panel glass-panel my-3">
           <v-card-text class="text-center py-4">
             <div class="text-h6 font-weight-medium mb-2">
               {{ currentSentence.text }}
@@ -222,20 +228,27 @@ async function completePractice() {
           </v-card-text>
         </v-card>
 
-        <!-- Play Reference -->
-        <div class="d-flex justify-center mb-4">
-          <audio ref="audioRef" preload="auto" style="display:none" />
+        <!-- Listen Step -->
+        <div v-if="currentStep === 'listen'" class="text-center my-4">
           <v-btn
             variant="tonal"
             color="primary"
+            size="large"
+            :loading="autoPlaying"
             prepend-icon="mdi-play-circle"
             @click="playReference">
             {{ $t('practice.shadowing.playReference') }}
           </v-btn>
+          <div class="text-caption text-medium-emphasis mt-2">
+            Listen to the reference audio, then click Record.
+          </div>
+          <v-btn variant="text" color="primary" class="mt-2" @click="startRecording">
+            Ready — Start Recording →
+          </v-btn>
         </div>
 
-        <!-- Recording -->
-        <div class="d-flex flex-column align-center mb-4">
+        <!-- Record Step -->
+        <div v-if="currentStep === 'record'" class="d-flex flex-column align-center my-4">
           <RecordButton
             size="large"
             @recorded="onRecorded"
@@ -246,34 +259,28 @@ async function completePractice() {
             class="mt-2 recording-visualizer"
             :height="40"
             :bars="24" />
-        </div>
-
-        <!-- Score Result -->
-        <ScoreCard
-          v-if="scoring.lastScore"
-          :score="scoring.lastScore"
-          class="mb-4" />
-
-        <WordScoreList
-          v-if="scoring.lastScore"
-          :word-scores="scoring.lastScore.wordScores"
-          class="mb-4" />
-
-        <!-- Navigation -->
-        <div class="d-flex justify-space-between">
-          <v-btn
-            variant="text"
-            :disabled="!hasPrev"
-            @click="prevSentence">
-            ← {{ $t('practice.shadowing.sentence') }}
-          </v-btn>
-          <v-btn
-            color="primary"
-            variant="tonal"
-            @click="nextSentence">
-            {{ hasNext ? $t('practice.shadowing.next') : $t('practice.shadowing.complete') }} →
+          <v-btn variant="text" size="small" class="mt-2" @click="playReference">
+            🔄 Listen again
           </v-btn>
         </div>
+
+        <!-- Result Step -->
+        <template v-if="currentStep === 'result' && scoring.lastScore">
+          <ScoreCard :score="scoring.lastScore" class="mb-3" />
+          <WordScoreList :word-scores="scoring.lastScore.wordScores" class="mb-3" />
+
+          <div class="d-flex justify-center ga-3">
+            <v-btn variant="text" @click="prevSentence" :disabled="!hasPrev">
+              ← Prev
+            </v-btn>
+            <v-btn
+              color="primary"
+              variant="tonal"
+              @click="nextSentence">
+              {{ hasNext ? 'Next →' : 'Finish →' }}
+            </v-btn>
+          </div>
+        </template>
       </div>
     </template>
 
@@ -288,16 +295,8 @@ async function completePractice() {
   padding: 10px;
   height: 100%;
   background:
-    radial-gradient(
-      circle at top right,
-      rgba(var(--v-theme-primary), 0.08),
-      transparent 22%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(var(--v-theme-surface), 1),
-      rgba(var(--v-theme-surface), 0.98)
-    );
+    radial-gradient(circle at top right, rgba(var(--v-theme-primary), 0.08), transparent 22%),
+    linear-gradient(180deg, rgba(var(--v-theme-surface), 1), rgba(var(--v-theme-surface), 0.98));
 }
 
 .shadowing-workspace {
@@ -308,11 +307,7 @@ async function completePractice() {
 .sentence-panel {
   border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   background:
-    radial-gradient(
-      circle at top right,
-      rgba(var(--v-theme-primary), 0.1),
-      transparent 30%
-    ),
+    radial-gradient(circle at top right, rgba(var(--v-theme-primary), 0.1), transparent 30%),
     rgba(var(--v-theme-surface), 0.78);
   backdrop-filter: blur(18px);
 }

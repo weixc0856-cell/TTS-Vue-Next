@@ -1,0 +1,16 @@
+{
+    "id": "dialogue-taxi",
+    "title": "Taking a Taxi",
+    "difficulty": "beginner",
+    "category": "travel",
+    "exchanges": [
+        {"role": "A", "text": "Where would you like to go?", "translation": "您要去哪里？"},
+        {"role": "B", "text": "Grand Central Station, please.", "translation": "请去中央车站。"},
+        {"role": "A", "text": "Sure. It should take about twenty minutes.", "translation": "好的。大约需要二十分钟。"},
+        {"role": "B", "text": "Do you know how much it will cost?", "translation": "你知道大概多少钱吗？"},
+        {"role": "A", "text": "Around fifteen to twenty dollars depending on traffic.", "translation": "大约十五到二十美元，取决于交通状况。"},
+        {"role": "B", "text": "That sounds fine. I'm in a bit of a hurry.", "translation": "可以。我有点赶时间。"},
+        {"role": "A", "text": "No problem. I'll take the expressway to save time.", "translation": "没问题。我走高速省时间。"},
+        {"role": "B", "text": "Thank you, I appreciate it.", "translation": "谢谢，非常感谢。"}
+    ]
+}

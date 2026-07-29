@@ -1,0 +1,16 @@
+{
+    "id": "dialogue-phone-plan",
+    "title": "Choosing a Phone Plan",
+    "difficulty": "intermediate",
+    "category": "daily",
+    "exchanges": [
+        {"role": "A", "text": "Hello, welcome to MobilePlus. How can I help you?", "translation": "你好，欢迎来到MobilePlus。有什么可以帮您？"},
+        {"role": "B", "text": "Hi, I'm looking for a new phone plan.", "translation": "你好，我在找一个新的手机套餐。"},
+        {"role": "A", "text": "Are you looking for a plan for yourself or for your family?", "translation": "您是给自己找还是给家庭找？"},
+        {"role": "B", "text": "Just for myself. I need data for work.", "translation": "就我自己。工作需要流量。"},
+        {"role": "A", "text": "We have a plan with unlimited data for forty dollars a month.", "translation": "我们有一个无限流量套餐，每月四十美元。"},
+        {"role": "B", "text": "Does that include international calls?", "translation": "包含国际通话吗？"},
+        {"role": "A", "text": "Yes, it includes calls to over sixty countries.", "translation": "是的，包括超过六十个国家的通话。"},
+        {"role": "B", "text": "That sounds perfect. I'll sign up today.", "translation": "听起来很完美。我今天就办理。"}
+    ]
+}

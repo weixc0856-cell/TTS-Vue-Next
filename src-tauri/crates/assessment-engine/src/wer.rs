@@ -37,7 +37,7 @@ impl WerAssessor {
     }
 
     /// Compute Levenshtein distance on word sequences
-    fn word_edit_distance(ref_words: &[String], hyp_words: &[String]) -> Vec<Vec<usize>> {
+    pub fn word_edit_distance(ref_words: &[String], hyp_words: &[String]) -> Vec<Vec<usize>> {
         let ref_len = ref_words.len();
         let hyp_len = hyp_words.len();
         let mut dp = vec![vec![0usize; hyp_len + 1]; ref_len + 1];
@@ -66,7 +66,7 @@ impl WerAssessor {
     }
 
     /// Compute per-word status by tracing the edit distance back
-    fn compute_word_scores(
+    pub fn compute_word_scores(
         ref_words: &[String],
         hyp_words: &[String],
         dp: &[Vec<usize>],

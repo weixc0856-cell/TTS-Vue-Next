@@ -1,0 +1,14 @@
+{
+    "id": "shadowing-weather-climate",
+    "title": "Weather and Climate",
+    "mode": "shadowing",
+    "difficulty": "beginner",
+    "category": "daily",
+    "sentences": [
+        {"text": "What's the weather like today?", "translation": "今天天气怎么样？"},
+        {"text": "It's sunny and warm, perfect for a walk in the park.", "translation": "天气晴朗温暖，非常适合去公园散步。"},
+        {"text": "The forecast says it might rain later this evening.", "translation": "天气预报说今晚可能会下雨。"},
+        {"text": "I should bring an umbrella just in case.", "translation": "我应该带把伞以防万一。"},
+        {"text": "The temperature is around twenty-five degrees Celsius.", "translation": "温度大约在二十五摄氏度左右。"}
+    ]
+}

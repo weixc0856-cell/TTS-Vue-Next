@@ -1,0 +1,16 @@
+{
+    "id": "dialogue-shopping",
+    "title": "Shopping at the Mall",
+    "difficulty": "beginner",
+    "category": "daily",
+    "exchanges": [
+        {"role": "A", "text": "Welcome to the store. Can I help you find anything?", "translation": "欢迎光临。需要我帮你找什么吗？"},
+        {"role": "B", "text": "Yes, I'm looking for a winter coat.", "translation": "是的，我在找一件冬装外套。"},
+        {"role": "A", "text": "Sure, what size do you usually wear?", "translation": "好的，你通常穿什么尺码？"},
+        {"role": "B", "text": "I think I'm a medium. Can I try this one on?", "translation": "我想我是中号。我能试穿这件吗？"},
+        {"role": "A", "text": "Of course. The fitting rooms are right over there.", "translation": "当然。试衣间就在那边。"},
+        {"role": "B", "text": "It fits perfectly. How much is it?", "translation": "非常合身。多少钱？"},
+        {"role": "A", "text": "It's on sale today, so only sixty dollars.", "translation": "今天打折，只要六十美元。"},
+        {"role": "B", "text": "Great, I'll take it!", "translation": "太好了，我买了！"}
+    ]
+}

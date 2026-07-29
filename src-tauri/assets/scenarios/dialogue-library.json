@@ -1,0 +1,17 @@
+{
+    "id": "dialogue-library",
+    "title": "At the Library",
+    "difficulty": "intermediate",
+    "category": "academic",
+    "exchanges": [
+        {"role": "A", "text": "Excuse me, can you help me find a book?", "translation": "打扰一下，你能帮我找一本书吗？"},
+        {"role": "B", "text": "Of course. What's the title or author?", "translation": "当然。书名或作者是什么？"},
+        {"role": "A", "text": "I'm looking for 'A Brief History of Time' by Stephen Hawking.", "translation": "我在找史蒂芬·霍金的《时间简史》。"},
+        {"role": "B", "text": "Let me check the computer system. It should be in the science section.", "translation": "让我查一下电脑系统。应该在科学区。"},
+        {"role": "A", "text": "Is it available for borrowing?", "translation": "可以借阅吗？"},
+        {"role": "B", "text": "Yes, it's currently available. It's on the third floor, shelf 42.", "translation": "可以，目前可借。在三楼42号书架。"},
+        {"role": "A", "text": "How long can I borrow it for?", "translation": "我能借多久？"},
+        {"role": "B", "text": "Three weeks, and you can renew it online.", "translation": "三周，可以在线续借。"},
+        {"role": "A", "text": "Perfect. Thank you so much for your help!", "translation": "太好了。非常感谢你的帮助！"}
+    ]
+}

@@ -1,0 +1,14 @@
+{
+    "id": "shadowing-daily-routine",
+    "title": "Daily Morning Routine",
+    "mode": "shadowing",
+    "difficulty": "beginner",
+    "category": "daily",
+    "sentences": [
+        {"text": "I wake up at seven o'clock every morning.", "translation": "我每天早上七点起床。"},
+        {"text": "After that, I brush my teeth and wash my face.", "translation": "然后我刷牙洗脸。"},
+        {"text": "I usually have toast and eggs for breakfast.", "translation": "我早餐通常吃吐司和鸡蛋。"},
+        {"text": "Then I pack my bag and leave for work.", "translation": "然后我收拾包去上班。"},
+        {"text": "It takes about thirty minutes to get to the office.", "translation": "到办公室大约需要三十分钟。"}
+    ]
+}

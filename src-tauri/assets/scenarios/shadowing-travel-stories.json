@@ -1,0 +1,15 @@
+{
+    "id": "shadowing-travel-stories",
+    "title": "Travel Stories",
+    "mode": "shadowing",
+    "difficulty": "intermediate",
+    "category": "travel",
+    "sentences": [
+        {"text": "Last summer, I visited Japan for the first time.", "translation": "去年夏天我第一次去了日本。"},
+        {"text": "I was amazed by the beautiful temples and gardens.", "translation": "我被美丽的寺庙和花园震撼到了。"},
+        {"text": "The food was incredible, especially the sushi in Tokyo.", "translation": "食物非常棒，尤其是东京的寿司。"},
+        {"text": "I also learned a few basic phrases in Japanese.", "translation": "我还学了一些基础的日语短语。"},
+        {"text": "The locals were very friendly and helpful.", "translation": "当地人非常友好和乐于助人。"},
+        {"text": "I can't wait to go back and explore more of the country.", "translation": "我等不及要再去探索这个国家更多地方。"}
+    ]
+}

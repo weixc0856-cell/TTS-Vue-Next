@@ -23,6 +23,10 @@ function startShadowing() {
 function startRoleplay() {
   router.push('/practice/roleplay');
 }
+
+function startPronunciation() {
+  router.push('/practice/pronunciation');
+}
 </script>
 
 <template>
@@ -102,8 +106,8 @@ function startRoleplay() {
         </v-card-text>
       </v-card>
 
-      <!-- Pronunciation (disabled) -->
-      <v-card flat class="mode-card glass-panel mode-card--disabled">
+      <!-- Pronunciation -->
+      <v-card flat class="mode-card glass-panel" @click="startPronunciation">
         <v-card-text class="mode-card__body">
           <v-avatar color="warning" variant="tonal" size="52" class="mode-icon">
             <v-icon size="28">mdi-alphabetical-variant</v-icon>
@@ -116,7 +120,7 @@ function startRoleplay() {
               {{ $t('practice.hub.pronunciationDesc') }}
             </div>
           </div>
-          <v-chip size="x-small" color="warning" variant="tonal">Soon</v-chip>
+          <v-icon color="primary" size="24">mdi-arrow-right</v-icon>
         </v-card-text>
       </v-card>
 

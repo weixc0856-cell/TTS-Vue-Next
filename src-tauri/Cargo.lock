@@ -142,8 +142,10 @@ name = "assessment-engine"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "log",
  "practice-domain",
  "serde",
+ "serde_json",
  "speech-engine",
  "thiserror 2.0.18",
  "tokio",

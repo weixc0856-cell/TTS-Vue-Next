@@ -3,6 +3,7 @@ use thiserror::Error;
 use practice_domain::ScoreResult;
 use speech_engine::Audio;
 
+pub mod phoneme;
 pub mod wer;
 
 /// Errors from pronunciation assessment

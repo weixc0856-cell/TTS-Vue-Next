@@ -1,0 +1,16 @@
+{
+    "id": "shadowing-tech-presentation",
+    "title": "Technology Presentation",
+    "mode": "shadowing",
+    "difficulty": "advanced",
+    "category": "business",
+    "sentences": [
+        {"text": "Thank you all for being here today.", "translation": "感谢大家今天来到这里。"},
+        {"text": "I'm excited to share our latest product development with you.", "translation": "我很兴奋能与大家分享我们最新的产品开发。"},
+        {"text": "Our team has been working on this for the past six months.", "translation": "我们的团队过去六个月一直在研发这个。"},
+        {"text": "The key innovation is our new machine learning algorithm.", "translation": "关键的创新是我们的新机器学习算法。"},
+        {"text": "It improves processing speed by over fifty percent.", "translation": "它提升了超过百分之五十的处理速度。"},
+        {"text": "We've already tested it with several beta customers.", "translation": "我们已经与几位测试客户进行了测试。"},
+        {"text": "The feedback has been overwhelmingly positive so far.", "translation": "到目前为止反馈非常积极。"}
+    ]
+}

@@ -34,6 +34,11 @@ const routes = [
     }),
   },
   {
+    path: "/practice/pronunciation",
+    name: "pronunciation",
+    component: () => import("../components/practice/pronunciation/DrillSession.vue"),
+  },
+  {
     path: "/practice/history",
     name: "practice-history",
     component: () => import("../views/practice/PracticeHistory.vue"),
