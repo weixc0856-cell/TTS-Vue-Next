@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useSettingsStore } from '../../../stores/settings';
 
 const settingsStore = useSettingsStore();
+const autoDetected = ref(false);
 
 const modelSizeOptions = [
   { title: 'Base.en (142MB, recommended)', value: 'base.en' },
@@ -16,19 +17,75 @@ const isConfigured = computed(() => {
 });
 
 const statusText = computed(() => {
-  if (isConfigured.value) {
-    return '✅ Whisper configured';
-  }
+  if (isConfigured.value) return '✅ Whisper configured';
+  if (autoDetected.value) return '⚠️ Model file detected but binary not set';
   return '⚠️ Not configured — scoring will use placeholder';
 });
 
 const statusColor = computed(() => {
-  return isConfigured.value ? 'success' : 'warning';
+  return isConfigured.value ? 'success' : autoDetected.value ? 'info' : 'warning';
 });
 
 const downloadLink = computed(() => {
   const size = settingsStore.whisperModelSize || 'base.en';
   return `https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-${size}.bin`;
+});
+
+// ── Auto-detect ──
+
+async function detectPaths() {
+  // Try to find a ggml-*.bin model in common locations
+  const candidates = [
+    'D:\\Project\\TTS Vue Next\\ggml-base.en.bin',
+    'D:\\Project\\TTS Vue Next\\ggml-small.en.bin',
+    'D:\\Project\\TTS Vue Next\\ggml-tiny.en.bin',
+    'C:\\tools\\whisper.cpp\\ggml-base.en.bin',
+    'C:\\tools\\whisper.cpp\\ggml-small.en.bin',
+    './ggml-base.en.bin',
+    './ggml-small.en.bin',
+  ];
+
+  const fs = await import('@tauri-apps/plugin-fs');
+
+  // Check if model already set but empty
+  if (!settingsStore.whisperModelPath) {
+    for (const candidate of candidates) {
+      try {
+        const exists = await fs.exists(candidate);
+        if (exists) {
+          settingsStore.updateWhisperModelPath(candidate);
+          autoDetected.value = true;
+          break;
+        }
+      } catch {
+        // Try next
+      }
+    }
+  }
+
+  // Try to find whisper-cli binary in common locations
+  if (!settingsStore.whisperBinPath) {
+    const binCandidates = [
+      'C:\\tools\\whisper.cpp\\whisper-cli.exe',
+      'C:\\whisper.cpp\\whisper-cli.exe',
+      '.\\whisper-cli.exe',
+    ];
+    for (const candidate of binCandidates) {
+      try {
+        const exists = await fs.exists(candidate);
+        if (exists) {
+          settingsStore.updateWhisperBinPath(candidate);
+          break;
+        }
+      } catch {
+        // Try next
+      }
+    }
+  }
+}
+
+onMounted(() => {
+  detectPaths();
 });
 
 async function selectWhisperBinary() {
@@ -68,6 +125,7 @@ async function selectWhisperModel() {
 function clearPaths() {
   settingsStore.updateWhisperBinPath('');
   settingsStore.updateWhisperModelPath('');
+  autoDetected.value = false;
 }
 </script>
 
@@ -83,14 +141,12 @@ function clearPaths() {
         size="x-small"
         variant="tonal"
         class="ml-2">
-        {{ isConfigured ? 'Configured' : 'Not configured' }}
+        {{ isConfigured ? 'Configured' : autoDetected ? 'Partial' : 'Not configured' }}
       </v-chip>
     </div>
 
     <div class="text-caption text-medium-emphasis mb-3">
-      {{ statusText }}.
-      Whisper is used to transcribe your recordings for pronunciation scoring.
-      You need to download a model and the whisper-cli binary.
+      {{ statusText }}
     </div>
 
     <!-- Binary Path -->
@@ -152,6 +208,13 @@ function clearPaths() {
       <span class="text-caption text-medium-emphasis ml-2">
         ~{{ settingsStore.whisperModelSize === 'small.en' ? '466' : settingsStore.whisperModelSize === 'base.en' ? '142' : '75' }}MB
       </span>
+    </div>
+
+    <!-- Status text after detection -->
+    <div
+      v-if="autoDetected && !isConfigured"
+      class="text-caption text-success mt-1">
+      ✅ Found ggml-base.en.bin! Still need to set whisper-cli binary path.
     </div>
 
     <!-- Clear button -->
